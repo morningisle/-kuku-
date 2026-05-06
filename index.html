@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一格电也能kuku生活</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        .font-zcool {
+            font-family: 'ZCOOL KuaiLe', cursive;
+        }
+
+        .hand-drawn-border {
+            border: 2px solid #8C7A6B;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+        }
+
+        @keyframes flyToDog {
+            0% { transform: scale(1) translate(0, 0); opacity: 1; }
+            100% { transform: scale(0.1) translate(var(--tx), var(--ty)); opacity: 0; }
+        }
+
+        .fade-in-out {
+            animation: fadeInOut 5s forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            10% { opacity: 1; transform: translateY(0) scale(1); }
+            90% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-20px) scale(0.95); }
+        }
+
+        @keyframes popBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2) translateY(-10px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+        .anim-pop-bounce {
+            animation: popBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes happyShake {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-15deg) scale(1.15); }
+            50% { transform: rotate(15deg) scale(1.15); }
+            75% { transform: rotate(-15deg) scale(1.15); }
+        }
+        .anim-happy-shake {
+            animation: happyShake 0.6s ease-in-out;
+        }
+
+        @keyframes jiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
+        }
+        .anim-jiggle {
+            animation: jiggle 0.3s ease-in-out infinite;
+        }
+
+        .task-checkbox {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #8C7A6B;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            background-color: #fff;
+            transition: all 0.2s;
+        }
+        .task-checkbox:checked {
+            background-color: #A3C9A8;
+            border-color: #A3C9A8;
+        }
+        .task-checkbox:checked::after {
+            content: '✔';
+            position: absolute;
+            color: white;
+            font-size: 16px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 隐藏滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #DAB894;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const forgivenessQuotes = [
+            "我就靠着这格电量，死皮赖脸地活着——易立竞",
+            "看不清眼前路的人不用着急，把今天过好、把此刻过好，好好吃饭、好好睡觉，有一口气撑着，说不定哪天命运就把那个结打开了，柳暗花明。——易立竞",
+            "“你不必总是试图提升自己，你只需要存在就好。你不必总是做些什么。只要活着，你就已经是对这个世界最大的贡献了。” —— 马特·海格",
+            "“人是为了活着本身而活着的，而不是为了活着之外的任何事物所活着。” —— 余华",
+            "“对于可控的事情保持谨慎，对于不可控的事情保持乐观。如果你今天什么都不想做，那就接纳这个什么都不想做的自己。这不叫摆烂，这叫与自己和解。” —— 罗翔",
+            "“如果你今天只是在呼吸，那也完全没关系。”",
+            "“人不是工具，人是目的。你不需要随时随地都保持‘有用’的状态。‘无用’也是一种珍贵的权利。” —— 刘擎",
+            "“如果觉得活得太累，那就降低对自己的要求。这不是认输，这是饶了自己。” —— 蔡康永",
+            "“如果一个人跟不上他的同伴，那也许是因为他听到了不同的鼓声。让他踏着他听到的音乐节拍前行吧，无论那节拍有多迟缓。” —— 梭罗",
+            "“开心点朋友们，人间不值得。不值得大家这么不开心。” —— 李诞",
+            "“你要允许有些事情，就是做不到。允许自己有无可奈何的时候。” —— 迟子建",
+            "“你想干什么？”“我想游手好闲。”——毛姆",
+            "“我的修身原则：一，不工作；二，没人管；三，一个人。”——木心",
+            "“有时我们会沉湎于苦恼而无法自拔：躺平。不动，没有斗志也没有未来。”——加缪",
+            "“我从没喜欢过工作，我的目标永远是得过且过。”——雷蒙德 · 卡佛",
+            "“我没有钱用，但又懒得去挣钱。”——契诃夫",
+            "“1858 年 9 月 19 日：很愉快。决定了，应当爱、应当劳动！就这样。1858 年 9 月 20 日：很累，不想爱，也不想劳动了。“——列夫 · 托尔斯泰",
+            "“如果有人强迫你做你不喜欢做的事，别拒绝，把事情搞砸就行了。”————K.J.帕克",
+            "“没有比我更愚蠢的人类，十五岁的诗，五十岁才写出来，十六岁又忘记了谈恋爱，唯一持之以恒在吃饭。”——池莉",
+            "“我的自我感觉不差，体重没有减轻，对未来充满希望。天气好极了。钱几乎没有。”——契诃夫",
+            "“没有钱用，但又懒得去挣钱。请您给我寄一些钱来吧！”——契诃夫",
+            "“巧者劳而知者忧，无能者无所求，饱食而遨游，泛若不系之舟，虚而遨游者也”——庄子"
+        ];
+
+        const healingQuotes = [
+            "“车灯只能照亮50米，但你依然能开完全程”",
+            "“做1的时候，不要去想5的事情。”",
+            "“我喜欢无聊，喜欢虚度光阴，喜欢停顿，喜欢时间停滞的瞬间。”——罗曼·莫内里",
+            "“你还记得吗?那次我们以为自己正坐在深渊边上，结果发现脚下是条平坦的大路。现在的处境，说不定也是这样。”——亨利克·显克微支",
+            "“六年前我就以为我要死了，现在我在吃舒芙蕾。”——monsoon",
+            "“如果没有什么值得庆祝的事，那也可以庆祝没有任何事发生。”——李到禹",
+            "“不要回头。不要冥思苦想目的地会有什么。不要想着摔倒。不要以为自己已经到了。不要绝望。”——敦·德勒根",
+            "“您唯一的义务就是好好地活下去，让自己快乐。”——加缪",
+            "“生活归根结底不就是可以喝上一杯像样的咖啡和有一个可以舒展身体的房间吗？”——艾丽丝·门罗",
+            "“洗一个澡，看一朵花，吃一顿饭，假使你觉得快活，并非全因为澡洗得干净，花开得好，或者菜合你口味，主要因为你心上没有挂碍。轻松的灵魂可以专注肉体的感觉，来欣赏，来审定。”——钱锺书《论快乐》",
+            "“像你这样才华横溢的小朋友，就像汽水里的泡泡，能靠着自己的力量，慢慢升起没有事情可以阻止你。”——阿德瓦·香登",
+            "“如果今天觉得实在没有力气，那就把自己当成一只在草地上晒太阳的小狗吧。光是毛茸茸地存在着，就已经非常完美了。” —— 查理斯·舒尔茨",
+            "“在隆冬，我终于知道，我身上有一个不可战胜的夏天。” —— 阿尔贝·加缪",
+            "“冬天从这里夺去的，新春一定会连本带利地交还给你。” —— 维克多·雨果",
+            "“你可以剪掉所有的花，但你永远不能阻止春天的到来。” —— 巴勃罗·聂鲁达",
+            "“不管前方的路有多苦，只要走的方向正确，哪怕多么崎岖不平，都比站在原地更接近幸福。” —— 宫崎骏"
+        ];
+
+        const { useState, useEffect, useRef } = React;
+
+        const defaultTasks = [
+            {id: 1, text: "成功下床并换下睡衣", checked: false, icon: "./元素素材/休息.png"},
+            {id: 2, text: "喝一杯水", checked: false, icon: "./元素素材/喝水.png"},
+            {id: 3, text: "跟至少1个人说话", checked: false, icon: "./元素素材/聊天.png"},
+            {id: 4, text: "吃三顿饭", checked: false, icon: "./元素素材/吃饭.png"}
+        ];
+        const defaultBackup = [
+            {id: 11, text: "活动肩颈5分钟", checked: false},
+            {id: 12, text: "抬头20下", checked: false},
+            {id: 13, text: "丢掉桌子上的垃圾", checked: false}
+        ];
+
+        function App() {
+            const [tasks, setTasks] = useState(() => {
+                const saved = localStorage.getItem('kuku_tasks');
+                return saved ? JSON.parse(saved) : defaultTasks;
+            });
+            const [backupTasks, setBackupTasks] = useState(() => {
+                const saved = localStorage.getItem('kuku_backup');
+                return saved ? JSON.parse(saved) : defaultBackup;
+            });
+            const [tomorrowTasks, setTomorrowTasks] = useState(() => {
+                const saved = localStorage.getItem('kuku_tomorrow');
+                return saved ? JSON.parse(saved) : [];
+            });
+            
+            const [showWelcomeBack, setShowWelcomeBack] = useState(false);
+            
+            const [trashText, setTrashText] = useState("");
+            const [dogState, setDogState] = useState('closed'); // 'closed' | 'open'
+            const [isChewing, setIsChewing] = useState(false);
+            const [animatedText, setAnimatedText] = useState(null);
+            
+            const [quote, setQuote] = useState(null);
+            const [isBackupExpanded, setIsBackupExpanded] = useState(false);
+            const [hasShownBackupQuote, setHasShownBackupQuote] = useState(false);
+
+            const getIconForText = (text, index) => {
+                if (text.includes("吃") || text.includes("饭")) return "./元素素材/吃饭.png";
+                if (text.includes("喝") || text.includes("水")) return "./元素素材/喝水.png";
+                if (text.includes("垃圾")) return "./元素素材/小狗丢垃圾.png";
+                if (text.includes("聊") || text.includes("说")) return "./元素素材/聊天.png";
+                if (text.includes("跑") || text.includes("走") || text.includes("步") || text.includes("锻炼") || text.includes("活动")) return "./元素素材/小狗跑步.png";
+                if (text.includes("睡") || text.includes("床") || text.includes("息") || text.includes("起")) return "./元素素材/休息.png";
+                
+                const fallbacks = [
+                    "./元素素材/彩虹.png",
+                    "./元素素材/太阳.png",
+                    "./元素素材/花朵1.png",
+                    "./元素素材/飘带.png"
+                ];
+                return fallbacks[index % fallbacks.length];
+            };
+
+            const saveToHistory = (type, content) => {
+                const history = JSON.parse(localStorage.getItem('kuku_history') || '[]');
+                const now = new Date();
+                const date = now.toLocaleDateString('zh-CN');
+                const time = now.toLocaleTimeString('zh-CN', { hour12: false });
+                history.push({ date, time, type, content });
+                localStorage.setItem('kuku_history', JSON.stringify(history));
+            };
+
+            const exportToCSV = () => {
+                const history = JSON.parse(localStorage.getItem('kuku_history') || '[]');
+                if (history.length === 0) {
+                    alert("还没产生任何记录哦，去完成几个小目标或者粉碎情绪再来吧~");
+                    return;
+                }
+                let csvContent = "\uFEFF"; 
+                csvContent += "日期,时间,行为类型,具体内容\n";
+                history.forEach(row => {
+                    const safeContent = row.content ? row.content.replace(/"/g, '""') : '';
+                    csvContent += `"${row.date}","${row.time}","${row.type}","${safeContent}"\n`;
+                });
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `我的kuku生活记录_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            const inputRef = useRef(null);
+            const dogRef = useRef(null);
+            const prevAllBackupDoneRef = useRef(false);
+
+            useEffect(() => {
+                const lastLogin = localStorage.getItem('kuku_lastLogin');
+                const now = Date.now();
+                if (lastLogin && (now - parseInt(lastLogin)) > 48 * 60 * 60 * 1000) {
+                    setShowWelcomeBack(true);
+                }
+                localStorage.setItem('kuku_lastLogin', now.toString());
+            }, []);
+
+            useEffect(() => {
+                localStorage.setItem('kuku_tasks', JSON.stringify(tasks));
+            }, [tasks]);
+
+            useEffect(() => {
+                localStorage.setItem('kuku_backup', JSON.stringify(backupTasks));
+            }, [backupTasks]);
+            
+            useEffect(() => {
+                localStorage.setItem('kuku_tomorrow', JSON.stringify(tomorrowTasks));
+            }, [tomorrowTasks]);
+
+            const allMainDone = tasks.length > 0 && tasks.every(t => t.checked);
+            const allBackupDone = backupTasks.length > 0 && backupTasks.every(t => t.checked);
+
+            let currentBatteryState = 1; // 1: Red, 2: Yellow, 3: Green
+            if (allMainDone && allBackupDone) currentBatteryState = 3;
+            else if (allMainDone) currentBatteryState = 2;
+
+            const [batteryAnim, setBatteryAnim] = useState('');
+            const prevStateRef = useRef(currentBatteryState);
+
+            useEffect(() => {
+                if (currentBatteryState !== prevStateRef.current) {
+                    if (currentBatteryState === 2 && prevStateRef.current === 1) {
+                        setBatteryAnim('anim-pop-bounce');
+                    } else if (currentBatteryState === 3 && prevStateRef.current === 2) {
+                        setBatteryAnim('anim-happy-shake');
+                    }
+                    const timer = setTimeout(() => setBatteryAnim(''), 600);
+                    prevStateRef.current = currentBatteryState;
+                    return () => clearTimeout(timer);
+                }
+            }, [currentBatteryState]);
+
+            const batteryImg = currentBatteryState === 3 ? './battery-green.png' 
+                             : currentBatteryState === 2 ? './battery-yellow.png' 
+                             : './battery-red.png';
+
+            useEffect(() => {
+                if (allBackupDone && !prevAllBackupDoneRef.current && !hasShownBackupQuote) {
+                    const randomQuote = healingQuotes[Math.floor(Math.random() * healingQuotes.length)];
+                    setQuote(randomQuote);
+                    setTimeout(() => setQuote(null), 5000);
+                    setHasShownBackupQuote(true);
+                }
+                prevAllBackupDoneRef.current = allBackupDone;
+            }, [allBackupDone, hasShownBackupQuote]);
+
+            const resetDay = () => {
+                setTasks(tasks.map(t => ({...t, checked: false})));
+                setBackupTasks(backupTasks.map(t => ({...t, checked: false})));
+                setIsBackupExpanded(false);
+                setHasShownBackupQuote(false);
+                if (tomorrowTasks.length > 0) {
+                    const newBackups = tomorrowTasks.filter(t => t.trim() !== "").map(t => ({
+                        id: Date.now() + Math.random(),
+                        text: t,
+                        checked: false
+                    }));
+                    setBackupTasks(prev => [...prev, ...newBackups]);
+                    setTomorrowTasks([]);
+                }
+            };
+
+            const handleTrash = () => {
+                if (!trashText.trim() || isChewing) return;
+                
+                const iRect = inputRef.current.getBoundingClientRect();
+                const dRect = dogRef.current.getBoundingClientRect();
+                
+                const targetX = dRect.left + dRect.width / 2 - (iRect.left + iRect.width / 2);
+                const targetY = dRect.top + dRect.height / 2 - (iRect.top + iRect.height / 2);
+
+                setAnimatedText({
+                    text: trashText,
+                    top: iRect.top,
+                    left: iRect.left,
+                    width: iRect.width,
+                    tx: targetX,
+                    ty: targetY
+                });
+                
+                saveToHistory('粉碎负面情绪', trashText);
+                setTrashText("");
+                setIsChewing(true);
+                
+                let chews = 0;
+                setDogState('open');
+                const chewInterval = setInterval(() => {
+                    chews++;
+                    setDogState(prev => prev === 'closed' ? 'open' : 'closed');
+                    if (chews >= 5) {
+                        clearInterval(chewInterval);
+                        setDogState('closed');
+                        setIsChewing(false);
+                        setAnimatedText(null);
+                        
+                        const randomQuote = forgivenessQuotes[Math.floor(Math.random() * forgivenessQuotes.length)];
+                        setQuote(randomQuote);
+                        setTimeout(() => setQuote(null), 5000);
+                    }
+                }, 150);
+            };
+
+            return (
+                <div className="min-h-screen text-[#5C4B51] relative selection:bg-[#F2D7D5] bg-[#F9F6F0] overflow-x-hidden font-sans">
+                    
+                    {/* Welcome Back Modal */}
+                    {showWelcomeBack && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F9F6F0]/80 backdrop-blur-sm px-4">
+                            <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl max-w-sm w-full text-center hand-drawn-border transform scale-100 animate-[fadeIn_0.5s_ease-out]">
+                                <h2 className="text-3xl font-bold mb-4 font-zcool text-[#8C7A6B]">欢迎回来，<br/>这段时间过得好吗？</h2>
+                                <p className="text-[#8C7A6B] mb-8 text-base leading-relaxed font-medium">没关系的，什么时候回来都可以，<br/>这里永远有一格电为你亮着。</p>
+                                <button 
+                                    onClick={() => setShowWelcomeBack(false)}
+                                    className="bg-[#C4D7C9] text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-[#B5CABB] transition-all shadow-md active:scale-95">
+                                    抱抱 (关闭)
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Quote Overlay */}
+                    {quote && (
+                        <div className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none px-4">
+                            <div className="bg-white/95 backdrop-blur-sm px-10 py-10 rounded-[2.5rem] shadow-2xl max-w-xl w-full text-center text-xl md:text-2xl text-[#5C4B51] fade-in-out border-4 border-[#C4D7C9] font-zcool leading-relaxed">
+                                {quote}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Flying Text Animation */}
+                    {animatedText && (
+                        <div 
+                            className="bg-white px-5 py-3 rounded-2xl border-4 border-[#C4D7C9] text-[#5C4B51] shadow-lg font-bold"
+                            style={{
+                                position: 'fixed',
+                                top: animatedText.top, 
+                                left: animatedText.left, 
+                                width: animatedText.width,
+                                '--tx': `${animatedText.tx}px`,
+                                '--ty': `${animatedText.ty}px`,
+                                zIndex: 50,
+                                pointerEvents: 'none',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                animation: 'flyToDog 0.6s forwards cubic-bezier(0.4, 0, 0.2, 1)'
+                            }}>
+                            {animatedText.text}
+                        </div>
+                    )}
+
+                    {/* Section 1: Hero & Checklist (Off-white #F9F6F0) */}
+                    <section className="relative w-full bg-[#F9F6F0] pt-20 pb-40 px-6 min-h-[70vh] flex items-center overflow-hidden">
+                        {/* Scattered Elements */}
+                        <img src="./元素素材/太阳.png" alt="太阳" className="absolute top-8 left-8 md:left-16 w-24 md:w-32 opacity-90 animate-[spin_60s_linear_infinite]" />
+                        <img src="./元素素材/云朵1.png" alt="云朵" className="absolute top-24 right-10 md:right-24 w-32 md:w-48 opacity-80" />
+                        <img src="./元素素材/云朵2.png" alt="云朵" className="absolute bottom-40 left-5 md:left-20 w-24 md:w-36 opacity-70" />
+                        <img src="./元素素材/花朵1.png" alt="花朵" className="absolute top-40 left-1/3 w-12 md:w-16 opacity-80 rotate-12" />
+                        <img src="./元素素材/花朵2.png" alt="花朵" className="absolute bottom-20 right-1/4 w-10 md:w-14 opacity-80 -rotate-12" />
+                        <img src="./元素素材/彩虹.png" alt="彩虹" className="absolute top-1/4 right-0 w-40 opacity-50 transform translate-x-1/2" />
+
+                        <div className="max-w-[1200px] mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center relative z-10">
+                            {/* Left: Battery & Intro */}
+                            <div className="flex flex-col items-center md:items-start text-center md:text-left relative">
+                                <h1 className="text-5xl md:text-7xl font-bold font-zcool text-[#8C7A6B] mb-8 leading-tight drop-shadow-sm relative z-10">一格电也能<br className="hidden md:block"/>kuku生活</h1>
+                                <div className="relative inline-block group">
+                                    <img src={batteryImg} alt="Battery" className={`h-36 md:h-48 lg:h-56 object-contain transition-all duration-500 hover:scale-105 drop-shadow-xl relative z-10 ${batteryAnim}`} />
+                                    <button 
+                                        onClick={resetDay}
+                                        className="absolute -right-12 top-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-white/90 px-4 py-2 rounded-full shadow-md text-sm font-bold text-[#A89F91] hover:text-[#5C4B51] border border-[#E8F0E6] z-20">
+                                        重置
+                                    </button>
+                                </div>
+                                <p className="mt-8 text-[#8C7A6B] text-xl font-bold tracking-widest font-zcool bg-white/80 px-8 py-3 rounded-full shadow-sm border-2 border-white relative z-10">存在即胜利</p>
+                            </div>
+
+                            {/* Right: Checklist Grid/Card UI */}
+                            <div className="bg-white/90 backdrop-blur-md rounded-[3rem] p-8 md:p-10 shadow-xl border-4 border-white w-full transform hover:-translate-y-2 transition-transform duration-500 relative">
+                                <h2 className="text-3xl font-bold mb-8 flex items-center justify-center md:justify-start gap-4 text-[#8C7A6B] font-zcool">
+                                    生存清单
+                                </h2>
+                                <div className="grid grid-cols-1 gap-5">
+                                    {tasks.map((task, index) => (
+                                        <div key={task.id} className={`flex items-center gap-5 p-4 rounded-[2rem] transition-all border-4 relative group cursor-pointer ${task.checked ? 'bg-[#F9F6F0] border-transparent opacity-70' : 'bg-white border-[#F9F6F0] hover:shadow-lg hover:-translate-y-1'}`}>
+                                            
+                                            {/* Custom Big Icon */}
+                                            <div className="relative shrink-0 flex items-center justify-center w-20 h-20 rounded-full bg-[#F9F6F0] border-2 border-white shadow-inner">
+                                                <img src={getIconForText(task.text, index)} alt="icon" className={`w-14 h-14 object-contain transition-all ${task.checked ? 'grayscale opacity-50' : ''}`} />
+                                                <input type="checkbox" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" checked={task.checked} onChange={(e) => {
+                                                    const isChecked = e.target.checked;
+                                                    setTasks(tasks.map(t => t.id === task.id ? {...t, checked: isChecked} : t));
+                                                    if (isChecked) saveToHistory('完成基础生存目标', task.text);
+                                                }} />
+                                            </div>
+                                            
+                                            <div className="flex-1">
+                                                <input type="text" value={task.text} onChange={(e) => setTasks(tasks.map(t => t.id === task.id ? {...t, text: e.target.value} : t))} className="bg-transparent border-none focus:outline-none focus:ring-0 text-xl md:text-2xl w-full text-[#5C4B51] placeholder-[#C9BFA8] font-bold relative z-10" style={{textDecoration: task.checked ? 'line-through' : 'none', color: task.checked ? '#A89F91' : 'inherit'}} onClick={e => e.stopPropagation()} />
+                                            </div>
+
+                                            {/* Custom Checkbox Indicator */}
+                                            <div className={`shrink-0 w-8 h-8 rounded-full border-4 flex items-center justify-center transition-colors ${task.checked ? 'bg-[#C4D7C9] border-[#C4D7C9]' : 'border-[#F9F6F0]'}`}>
+                                                {task.checked && <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" /></svg>}
+                                            </div>
+                                            
+                                            <button onClick={() => setTasks(tasks.filter(t => t.id !== task.id))} className="absolute -right-3 -top-3 opacity-0 group-hover:opacity-100 bg-white text-[#DAB894] hover:text-red-400 p-2 rounded-full shadow-md text-xl leading-none transition-opacity">×</button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button onClick={() => setTasks([...tasks, {id: Date.now(), text: "", checked: false, icon: "./元素素材/星星.png"}])} className="mt-8 text-[#8BB890] hover:text-[#6B8E70] text-lg font-bold flex items-center gap-2 px-8 py-4 rounded-full bg-[#F9F6F0] hover:bg-[#E8F0E6] transition-colors border-2 border-white mx-auto shadow-sm">
+                                    + 新增小目标
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Wavy Divider -> Section 2 (Green) */}
+                        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] translate-y-[1px] z-20">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-[60px] md:h-[120px] fill-current text-[#C4D7C9]">
+                                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,126.38,201.3,121.7,242.06,119,282.49,106.8,321.39,56.44Z"></path>
+                            </svg>
+                        </div>
+                    </section>
+
+                    {/* Section 2: Puppy Trash Can (Morandi Green #C4D7C9) */}
+                    <section className="relative w-full bg-[#C4D7C9] py-32 px-6 min-h-[70vh] flex items-center overflow-hidden">
+                        {/* Scattered Elements */}
+                        <img src="./元素素材/星星.png" alt="星星" className="absolute top-20 left-10 w-12 md:w-16 opacity-70 rotate-45" />
+                        <img src="./元素素材/星星2.png" alt="星星" className="absolute bottom-20 right-10 w-10 md:w-14 opacity-60 -rotate-12" />
+                        <img src="./元素素材/叶子1.png" alt="叶子" className="absolute top-1/3 right-5 md:right-20 w-16 md:w-20 opacity-80 rotate-180" />
+                        <img src="./元素素材/叶子2.png" alt="叶子" className="absolute bottom-1/4 left-5 md:left-20 w-14 md:w-18 opacity-70 rotate-90" />
+                        
+                        <div className="max-w-[1200px] mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center relative z-10">
+                            
+                            {/* Left: Main Illustration */}
+                            <div className="flex justify-center items-center relative md:order-first order-last w-full h-full min-h-[300px]">
+                                <img ref={dogRef} src={dogState === 'closed' ? './dog-closed.png' : './dog-open.png'} alt="小狗丢垃圾" className={`w-[80%] md:w-[90%] object-contain drop-shadow-2xl transition-transform duration-300 ${isChewing ? 'anim-jiggle' : 'hover:-translate-y-2'}`} />
+                            </div>
+
+                            {/* Right: Text and Input */}
+                            <div className="flex flex-col items-center md:items-start text-center md:text-left pl-0 md:pl-10">
+                                <h2 className="text-5xl md:text-6xl font-bold font-zcool text-[#5C4B51] mb-6 leading-tight drop-shadow-sm">小狗垃圾桶</h2>
+                                <p className="text-[#5C4B51]/80 text-lg md:text-xl leading-relaxed max-w-md font-bold mb-10">交给我那些消耗你心力的负面情绪</p>
+                                
+                                <div className="w-full max-w-md relative flex flex-col items-end gap-5">
+                                    <textarea 
+                                        ref={inputRef} 
+                                        value={trashText} 
+                                        onChange={e => setTrashText(e.target.value)} 
+                                        placeholder="写下自责或疲惫的话..." 
+                                        className="w-full bg-white/90 backdrop-blur-sm px-8 py-6 rounded-[2.5rem] border-4 border-white focus:outline-none focus:ring-4 focus:ring-[#F9F6F0] text-xl text-[#5C4B51] placeholder-[#A89F91] shadow-xl transition-all resize-none h-40 font-medium" 
+                                        disabled={isChewing} 
+                                    />
+                                    <button 
+                                        onClick={handleTrash} 
+                                        disabled={!trashText.trim() || isChewing} 
+                                        className="bg-[#5C4B51] text-[#F9F6F0] px-10 py-4 rounded-full font-bold text-xl hover:bg-[#4A3B40] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl active:scale-95 flex items-center gap-2 relative overflow-hidden group">
+                                        <span className="relative z-10">粉碎情绪</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Wavy Divider -> Section 3 (Off-white) */}
+                        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] translate-y-[1px] z-20">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-[60px] md:h-[120px] fill-current text-[#F9F6F0]">
+                                <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"></path>
+                            </svg>
+                        </div>
+                    </section>
+
+                    {/* Section 3: Backup Battery (Off-white #F9F6F0) */}
+                    <section className="relative w-full bg-[#F9F6F0] py-32 px-6 min-h-[70vh] flex items-center overflow-hidden">
+                        {/* Scattered Elements */}
+                        <img src="./元素素材/花朵3.png" alt="花朵" className="absolute top-1/4 right-1/4 w-12 md:w-16 opacity-80 rotate-45" />
+                        <img src="./元素素材/飘带.png" alt="飘带" className="absolute top-10 left-1/4 w-32 md:w-48 opacity-60 -rotate-12" />
+                        <img src="./元素素材/叶子3.png" alt="叶子" className="absolute bottom-20 left-10 w-16 opacity-70 rotate-90" />
+                        
+                        <div className="max-w-[1200px] mx-auto w-full flex flex-col md:flex-row gap-12 md:gap-20 items-center md:items-start relative z-10">
+                            
+                            {/* Left: Text & Dog Sleeping */}
+                            <div className="flex flex-col items-center md:items-start text-center md:text-left flex-1 relative">
+                                <div className="relative mb-6">
+                                    <h2 className="text-5xl md:text-6xl font-bold font-zcool text-[#8C7A6B] leading-tight drop-shadow-sm">备用电池</h2>
+                                    <img src="./元素素材/小狗睡觉.png" alt="小狗睡觉" className="absolute -top-16 -right-24 w-32 md:w-40 drop-shadow-lg hidden md:block rotate-12" />
+                                </div>
+                                <img src="./元素素材/小狗睡觉.png" alt="小狗睡觉" className="w-36 drop-shadow-lg block md:hidden mb-8" />
+
+                                <p className="text-[#8C7A6B] text-xl leading-relaxed max-w-md mb-8 font-bold">今天好像还有点多余的力气</p>
+                                {!allMainDone && (
+                                    <div className="bg-white/80 px-8 py-5 rounded-[2rem] border-4 border-dashed border-[#C4D7C9] shadow-sm animate-pulse w-full max-w-sm">
+                                        <p className="text-[#6B8E70] font-bold flex items-center justify-center gap-3 text-lg">
+                                            <svg className="w-8 h-8 text-[#6B8E70]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                            完成生存清单后解锁
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Right: Backup Battery Grid */}
+                            <div className="w-full flex-[1.5]">
+                                {allMainDone ? (
+                                    <div className="transition-all duration-1000 opacity-100 translate-y-0 w-full">
+                                        {!isBackupExpanded ? (
+                                            <div onClick={() => setIsBackupExpanded(true)} className="cursor-pointer text-center bg-white backdrop-blur-md hover:bg-[#F9F6F0] transition-all rounded-[3rem] p-12 shadow-2xl border-4 border-white group transform hover:-translate-y-2">
+                                                <p className="text-[#6B8E70] font-bold text-3xl mb-6 font-zcool group-hover:scale-105 transition-transform inline-block">好棒，今天也是kuku照顾好自己的一天</p>
+                                                <p className="text-xl text-[#8C7A6B] flex items-center justify-center gap-3 font-bold">
+                                                    还有余力活动一下吗？ <span className="bg-[#C4D7C9] text-white rounded-full p-2 shadow-sm"><svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg></span>
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="bg-white backdrop-blur-md rounded-[3rem] p-8 md:p-12 shadow-2xl border-4 border-white animate-[fadeIn_0.5s_ease-in]">
+                                                <h2 className="text-3xl font-bold mb-4 flex items-center gap-3 text-[#DAB894] font-zcool">
+                                                    备用电池
+                                                </h2>
+                                                <p className="text-lg text-[#8C7A6B] mb-8 font-bold">去码头整点薯条（仅在有余力时完成，不勉强）</p>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-12">
+                                                    {backupTasks.map(task => (
+                                                        <div key={task.id} onClick={() => {
+                                                            const isChecked = !task.checked;
+                                                            setBackupTasks(backupTasks.map(t => t.id === task.id ? {...t, checked: isChecked} : t));
+                                                            if (isChecked) saveToHistory('完成备用电池目标', task.text);
+                                                        }} className={`flex flex-col gap-3 p-6 rounded-3xl transition-all border-4 relative group cursor-pointer ${task.checked ? 'bg-[#F9F6F0] border-transparent opacity-60' : 'bg-white border-[#F9F6F0] hover:shadow-lg hover:-translate-y-1'}`}>
+                                                            <div className="flex items-start justify-between">
+                                                                <div className={`w-8 h-8 rounded-full border-4 flex items-center justify-center transition-colors ${task.checked ? 'bg-[#C4D7C9] border-[#C4D7C9]' : 'border-[#F9F6F0]'}`}>
+                                                                    {task.checked && <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" /></svg>}
+                                                                </div>
+                                                                <button onClick={(e) => {e.stopPropagation(); setBackupTasks(backupTasks.filter(t => t.id !== task.id))}} className="text-[#DAB894] hover:text-red-400 bg-white rounded-full p-1 shadow-sm opacity-60 hover:opacity-100 transition-opacity relative z-20">
+                                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                                </button>
+                                                            </div>
+                                                            <input type="text" value={task.text} onChange={(e) => setBackupTasks(backupTasks.map(t => t.id === task.id ? {...t, text: e.target.value} : t))} className="bg-transparent border-none focus:outline-none focus:ring-0 text-2xl font-bold w-full text-[#5C4B51] placeholder-[#C9BFA8] mt-2 relative z-10" style={{textDecoration: task.checked ? 'line-through' : 'none'}} onClick={e => e.stopPropagation()} />
+                                                        </div>
+                                                    ))}
+                                                    
+                                                    <div onClick={() => setBackupTasks([...backupTasks, {id: Date.now(), text: "", checked: false}])} className="flex flex-col items-center justify-center gap-3 p-6 rounded-3xl border-4 border-dashed border-[#C4D7C9]/50 bg-[#F9F6F0]/50 hover:bg-[#F9F6F0] transition-colors cursor-pointer min-h-[140px]">
+                                                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm text-[#8BB890] text-3xl font-bold">+</div>
+                                                        <span className="text-[#8BB890] font-bold text-lg">新增任务</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="border-t-4 border-dashed border-[#F9F6F0] pt-8 relative">
+                                                    <p className="text-xl font-bold text-[#6B8E70] mb-6">我明天应该会有点力气（限2项）：</p>
+                                                    {tomorrowTasks.map((text, idx) => (
+                                                        <div key={idx} className="flex items-center gap-4 mb-4">
+                                                            <img src="./元素素材/星星.png" alt="star" className="w-8 h-8 object-contain opacity-80" />
+                                                            <input type="text" value={text} onChange={(e) => { const newT = [...tomorrowTasks]; newT[idx] = e.target.value; setTomorrowTasks(newT); }} placeholder="明天的小目标..." className="bg-[#F9F6F0] px-6 py-4 rounded-2xl border-4 border-transparent focus:border-[#C4D7C9] focus:bg-white focus:outline-none text-xl font-bold w-full shadow-inner transition-all text-[#5C4B51]" />
+                                                            <button onClick={() => setTomorrowTasks(tomorrowTasks.filter((_, i) => i !== idx))} className="text-[#DAB894] hover:text-red-400 p-2 bg-white rounded-full shadow-sm text-2xl font-bold transition-transform hover:scale-110 leading-none flex items-center justify-center w-10 h-10">×</button>
+                                                        </div>
+                                                    ))}
+                                                    {tomorrowTasks.length < 2 && (
+                                                        <button onClick={() => setTomorrowTasks([...tomorrowTasks, ""])} className="mt-4 bg-[#F9F6F0] text-[#8C7A6B] text-lg px-8 py-4 rounded-full hover:bg-white transition-colors shadow-sm active:scale-95 font-bold flex items-center gap-2 border-2 border-white">
+                                                            <span className="text-2xl leading-none">+</span> 明日待做
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center opacity-40 pointer-events-none gap-6">
+                                        <img src="./battery-yellow.png" alt="Locked" className="h-40 grayscale blur-[3px] transition-all" />
+                                        <p className="text-2xl font-zcool text-[#8C7A6B]">未满电，休息中...</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                    </section>
+
+                    {/* Footer */}
+                    <footer className="relative w-full bg-[#F9F6F0] pb-24 px-6 flex flex-col items-center z-10">
+                        <div className="text-center opacity-60 hover:opacity-100 transition-opacity duration-500">
+                            <p className="text-sm md:text-base text-[#8C7A6B] leading-relaxed mb-6 max-w-[360px] mx-auto font-bold">
+                                如果「一格电」今天让你松了一口气，<br/>欢迎打赏支持一下网站升级计划。<br/>
+                                如果没力气，就什么都不做，<br/>我们能在这里互相陪伴已经很棒了。
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
+                                <a href="#" onClick={(e) => { e.preventDefault(); alert("抱抱你，你的存在已经是对世界最好的打赏啦！"); }} className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full border-4 border-[#DAB894] text-[#DAB894] text-sm md:text-base font-bold hover:bg-[#DAB894] hover:text-white transition-all active:scale-95 shadow-sm">
+                                    请作者喝杯茶
+                                </a>
+                                <button onClick={exportToCSV} className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full border-4 border-[#C4D7C9] text-[#C4D7C9] text-sm md:text-base font-bold hover:bg-[#C4D7C9] hover:text-white transition-all active:scale-95 shadow-sm">
+                                    导出生活记录 (CSV)
+                                </button>
+                            </div>
+                        </div>
+                    </footer>
+
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
